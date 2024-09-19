@@ -80,6 +80,14 @@ $conn->close();
 </head>
 <body>
 
+<div class='navbar'>
+    <a href='inicio.php'>Inicio</a>
+    <a href='pedidos.php' class='active'>Agregar Pedidos</a>
+    <a href='total.php'>Total de Pedidos</a>
+    <a href='index.php' style='float:right;'>Cerrar sesión</a>
+</div>
+
+
 <h2 id="realizarpedido">Realizar Pedido</h2>
 <form method="POST" action="pedidos.php">
     <div class="form-group">
@@ -109,12 +117,6 @@ $conn->close();
     <input type="submit" value="Completar Pedido">
 </form>
 
-<div class='navbar'>
-    <a href='inicio.php'>Inicio</a>
-    <a href='pedidos.php' class='active'>Agregar Pedidos</a>
-    <a href='total.php'>Total de Pedidos</a>
-    <a href='index.php' style='float:right;'>Cerrar sesión</a>
-</div>
 
 </body>
 </html>
