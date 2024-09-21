@@ -87,8 +87,8 @@ $conn->close();
     <a href='index.php' style='float:right;'>Cerrar sesión</a>
 </div>
 
-
 <h2 id="realizarpedido">Realizar Pedido</h2>
+
 <form method="POST" action="pedidos.php">
     <div class="form-group">
         <label for="nombreCliente">Nombre del Cliente:</label>
@@ -99,24 +99,29 @@ $conn->close();
         <h3>Seleccionar Producto y Cantidad</h3>
 
         <?php foreach ($productos as $categoria => $items): ?>
-            <div class="categoria-producto">
-                <h4><?php echo $categoria; ?></h4>
-                <?php foreach ($items as $producto): ?>
-                    <label>
-                        <input type="checkbox" name="productos[]" value="<?php echo $producto['idProductos']; ?>">
-                        <?php echo $producto['Nombre']; ?>
-                    </label>
-                    <label for="cantidad_<?php echo $producto['idProductos']; ?>">Cantidad:</label>
-                    <input type="number" id="cantidad_<?php echo $producto['idProductos']; ?>" name="cantidades[]" value="1" min="1">
-                    <br>
-                <?php endforeach; ?>
-            </div>
-        <?php endforeach; ?>
+    <div class="categoria-producto">
+        <!-- Mostrar la imagen correspondiente a la categoría -->
+        <img src="images/<?php echo strtolower($categoria); ?>.png" alt="<?php echo $categoria; ?>" class="categoria-imagen">
+        
+        <!-- Aquí agregamos un div para agrupar el texto y las casillas de verificación debajo de la imagen -->
+        <div class="categoria-items">
+            <?php foreach ($items as $producto): ?>
+                <label>
+                    <input type="checkbox" name="productos[]" value="<?php echo $producto['idProductos']; ?>">
+                    <?php echo $producto['Nombre']; ?>
+                </label>
+                <label for="cantidad_<?php echo $producto['idProductos']; ?>">Cantidad:</label>
+                <input type="number" id="cantidad_<?php echo $producto['idProductos']; ?>" name="cantidades[]" value="1" min="1">
+                <br>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endforeach; ?>
+
     </div>
 
     <input type="submit" value="Completar Pedido">
 </form>
-
 
 </body>
 </html>
