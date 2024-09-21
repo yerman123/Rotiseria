@@ -10,67 +10,121 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 150vh;
+    min-height: 100vh;
 }
 
 .categoria-imagen {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     margin-right: 10px;
+    border-radius: 10%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.categoria-imagen:hover {
+    transform: scale(1.1);
 }
 
 .categoria-producto {
     display: flex;
-    flex-direction: column; /* Pone la imagen y el texto en vertical */
-    align-items: center; /* Centra el contenido */
-    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.categoria-producto:hover {
+    transform: translateY(-5px);
 }
 
 .categoria-items {
-    text-align: center; /* Centra el texto y los inputs debajo de la imagen */
+    text-align: center;
+    margin-top: 15px;
 }
-
 
 label {
     font-size: 20px;
     font-weight: bold;
     color: #423932;
-    margin-right: 30px; /* Controla la separación entre el nombre del producto y la cantidad */
+    margin-right: 30px;
     display: inline-block;
     font-family: 'Roboto', sans-serif;
 }
 
 #realizarpedido {
-    font-size: 30px;
-    position: static;
+    font-size: 36px;
     margin-top: 100px;
-    z-index: 0;
+    color: #fffaf8;
+    text-shadow: 2px 2px 4px rgba(32, 0, 0, 0.897);
+}
+
+input[type="text"], input[type="number"] {
+    background-color: #ffefc2;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 3px solid #e4491a;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="number"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(228, 73, 26, 0.3);
 }
 
 input[type="text"] {
-    background-color: #ffefc2;
-    width: 200px; 
-    height: 10px; 
-    font-size: 16px; 
-    padding: 5px; 
-    border-radius: 5px; 
-    border: 4px solid #e4491a; 
+    width: 220px;
 }
 
 input[type="number"] {
-    background-color: #ffefc2;
-    width: 100px; 
-    height: 10px; 
-    font-size: 16px; 
-    padding: 5px; 
-    border-radius: 4px; 
-    border: 4px solid #e4491a; 
-    margin-top: 5px; /* Añade un pequeño espacio entre la casilla y el input */
+    width: 100px;
+    margin-top: 5px;
     display: inline-block;
 }
 
 h3 {
-    font-size: 25px;
-    position: static;
-    z-index: 0;
+    font-size: 28px;
+    color: #e4491a;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.5);
+    margin-right: 10px;
+}
+
+input[type="submit"] {
+    background-color: #e4491a;
+    color: white;
+    font-size: 20px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+input[type="submit"]:hover {
+    background-color: #c13815;
+}
+
+form {
+    background-color: rgba(255, 255, 255, 0.781);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 90%;
+    margin: 20px auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
 }
