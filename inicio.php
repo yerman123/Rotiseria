@@ -2,7 +2,7 @@
 include("conexion.php");
 session_start();
 
-# INICIO DE SESIÓN
+#INICIO DE SESIÓN
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -55,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         exit();
     }
 }
-
 // Navbar y bienvenida
 echo "<!DOCTYPE html>";
 echo "<html lang='es'>";
@@ -74,7 +73,7 @@ echo "<div class='navbar'>";
 echo "<a href='inicio.php?section=inicio' class='active'>Inicio</a>";
 echo "<a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>";
 echo "<a href='total.php?section=total'>Total de Pedidos</a>";
-echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";  // Cambié a logout.php para manejar la salida de sesión correctamente
+echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";
 echo "</div>";
 
 echo "<div class='content'>";
@@ -96,13 +95,13 @@ if ($result_pedidos->num_rows > 0) {
         echo "<tr>";
         echo "<td>" . $row["Cliente"] . "</td>";
         echo "<td>" . $row["Producto"] . "</td>";
-        echo "<td>" . $row["Cantidad"] . "</td>";  // Muestra la cantidad
+        echo "<td>" . $row["Cantidad"] . "</td>";
         echo "<td>" . $row["FechaPedido"] . "</td>";
         echo "<td>";
         // Botón que mueve el pedido al total y lo elimina
-        echo "<form method='POST' style='display:inline-block;'>";
+        echo "<form method='POST' action='completar.php' style='display:inline-block;'>";
         echo "<input type='hidden' name='pedido_id' value='" . $row["idPedidos"] . "'>";
-        echo "<button type='submit' name='eliminar_pedido'>Completar</button>";
+        echo "<button type='submit' name='transferir_pedido'>Completar</button>";
         echo "</form>";
         echo "</td>";
         echo "</tr>";
@@ -114,17 +113,4 @@ if ($result_pedidos->num_rows > 0) {
 echo "</div>"; // Cierre del div content
 echo "</body>";
 echo "</html>";
-
-// Acción de eliminar pedido y moverlo a total
-if (isset($_POST['eliminar_pedido'])) {
-    $pedido_id = $_POST['pedido_id'];
-
-    // Eliminación y actualización de la base de datos
-    $stmt = $conn->prepare("DELETE FROM pedidos WHERE idPedidos = ?");
-    $stmt->bind_param("i", $pedido_id);
-    $stmt->execute();
-
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
-} 
 ?>
