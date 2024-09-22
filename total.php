@@ -11,7 +11,7 @@ if (!isset($_SESSION['username'])) {
 
 #NAVBAR
 echo "<!DOCTYPE html>";
-echo "<html lang='en'>";
+echo "<html lang='es'>";
 echo "<head>";
 echo "<link href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap' rel='stylesheet'>";
 echo "<meta charset='UTF-8'>";
@@ -19,32 +19,23 @@ echo "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
 echo "<title>Total de Pedidos</title>";
 echo "<link rel='stylesheet' href='style/inicio.css'>";
 echo "<link rel='stylesheet' href='style/navbar.css'>";
-
-
 echo "</head>";
 echo "<body>";
 echo "<div class='navbar'>";
-echo "<a href='http://localhost/rotiseria/inicio.php'?section=inicio'>Inicio</a>";
-echo "<a href='pedidos.php'?section=pedidos'>Agregar Pedidos</a>";
+echo "<a href='inicio.php?section=inicio'>Inicio</a>";
+echo "<a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>";
 echo "<a href='total.php?section=total' class='active'>Total de Pedidos</a>";
 echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";
 echo "</div>";
 echo "<div class='content'>";
 echo "<h1>Total de Pedidos</h1>";
 
-
-
-#MOSTRAR EL TOTAL DE PEDIDOS
-$sql_total_pedidos = "SELECT COUNT(*) AS total_pedidos FROM Pedidos";
-$result_total_pedidos = $conn->query($sql_total_pedidos);
-
-
-
 #MOSTRAR TABLA TOTAL
-$sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, prod.Nombre AS Producto 
+$sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, prod.Nombre AS Producto, t.Cantidad 
 FROM Total t 
 INNER JOIN Clientes c ON t.idClientes = c.idClientes
-INNER JOIN Productos prod ON t.idProductos = prod.idProductos";
+INNER JOIN Productos prod ON t.idProductos = prod.idProductos
+ORDER BY t.FechaPedido DESC";
 $result_total = $conn->query($sql_total);
 
 if ($result_total) {
@@ -55,6 +46,7 @@ if ($result_total) {
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Producto</th>
+                <th>Cantidad</th>
             </tr>";
         while ($row = $result_total->fetch_assoc()) {
             echo "<tr>
@@ -62,6 +54,7 @@ if ($result_total) {
                     <td>" . $row["FechaPedido"] . "</td>
                     <td>" . $row["Cliente"] . "</td>
                     <td>" . $row["Producto"] . "</td>
+                    <td>" . $row["Cantidad"] . "</td>
                 </tr>";
         }
         echo "</table><br>";
