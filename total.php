@@ -25,6 +25,7 @@ echo "<div class='navbar'>";
 echo "<a href='inicio.php?section=inicio'>Inicio</a>";
 echo "<a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>";
 echo "<a href='total.php?section=total' class='active'>Total de Pedidos</a>";
+echo "<a href='clientes.php?section=clientes'>Clientes</a>";
 echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";
 echo "</div>";
 echo "<div class='content'>";
