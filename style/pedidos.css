@@ -14,11 +14,11 @@ body {
 }
 
 .categoria-imagen {
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
     margin-right: 10px;
     border-radius: 10%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    filter: drop-shadow(8px 4px 8px rgba(0, 0, 0, 0.199));
     transition: transform 0.3s ease;
 }
 
@@ -59,14 +59,13 @@ label {
 #realizarpedido {
     font-size: 36px;
     margin-top: 100px;
-    color: #fffaf8;
-    text-shadow: 2px 2px 4px rgba(32, 0, 0, 0.897);
+    color: #333333;
 }
 
 input[type="text"], input[type="number"] {
     background-color: #ffefc2;
     font-size: 16px;
-    padding: 10px;
+    padding: 5px;
     border-radius: 8px;
     border: 3px solid #e4491a;
     transition: all 0.3s ease;
@@ -82,7 +81,7 @@ input[type="text"] {
 }
 
 input[type="number"] {
-    width: 100px;
+    width: 50px;
     margin-top: 5px;
     display: inline-block;
 }
