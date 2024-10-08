@@ -84,6 +84,7 @@ $conn->close();
     <a href='inicio.php'>Inicio</a>
     <a href='pedidos.php' class='active'>Agregar Pedidos</a>
     <a href='total.php'>Total de Pedidos</a>
+    <a href='clientes.php'>Clientes</a>
     <a href='index.php' style='float:right;'>Cerrar sesión</a>
 </div>
 
@@ -92,7 +93,7 @@ $conn->close();
 <form method="POST" action="pedidos.php">
     <div class="form-group">
         <label for="nombreCliente">Nombre del Cliente:</label>
-        <input type="text" id="nombreCliente" name="nombreCliente">
+        <input type="text" id="nombreCliente" name="nombreCliente" required>
     </div>
 
     <div class="form-group">
