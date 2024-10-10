@@ -7,13 +7,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Verificación del formato del nombre de usuario
+    #verificación del formato del nombre de usuario
     if (!preg_match("/^[a-zA-Z]+$/", $username)) {
         echo "El nombre de usuario solo debe contener letras.";
         exit();
     }
 
-    // Verificar si el usuario existe en la base de datos
+    #verificar si el usuario existe en la base de datos
     $stmt = $conn->prepare("SELECT * FROM personas WHERE Usuario = ?");
     if ($stmt === false) {
         die("Error en prepare: " . $conn->error);
@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         exit();
     }
 
-    // Verificar si el usuario y la contraseña coinciden
+    #verificar si el usuario y la contraseña coinciden
     $stmt = $conn->prepare("SELECT * FROM personas WHERE Usuario = ? AND Clave = ?");
     if ($stmt === false) {
         die("Error en prepare: " . $conn->error);
@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
-        // Iniciar sesión si los datos son correctos
+        #iniciar sesión si los datos son correctos
         $row = $result->fetch_assoc();
         $_SESSION['username'] = $row['Usuario'];
         header("Location: inicio.php");
@@ -49,13 +49,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
 
     $stmt->close();
 } else {
-    // Redirigir al index.php si no hay una sesión iniciada
+    #Redirigir al index.php si no hay una sesión iniciada
     if (!isset($_SESSION['username'])) {
         header("Location: index.php");
         exit();
     }
 }
-// Navbar y bienvenida
+#navbar y bienvenida
 echo "<!DOCTYPE html>";
 echo "<html lang='es'>";
 echo "<head>";
@@ -68,19 +68,37 @@ echo "<link rel='stylesheet' href='style/navbar.css'>";
 echo "</head>";
 echo "<body>";
 
-// Navbar
+#navbar
 echo "<div class='navbar'>";
 echo "<a href='inicio.php?section=inicio' class='active'>Inicio</a>";
 echo "<a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>";
 echo "<a href='total.php?section=total'>Total de Pedidos</a>";
+echo "<a href='clientes.php?section=clientes'>Clientes</a>";
+echo "<a href='productos.php?section=productos'>Productos</a>";
 echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";
 echo "</div>";
 
 echo "<div class='content'>";
 echo "<h1>¡Bienvenido, " . $_SESSION['username'] . "!</h1>";  
 
-// Mostrar pedidos
+#mostrar pedidos
 $sql_pedidos = "SELECT p.idPedidos, c.Nombre AS Cliente, pr.Nombre AS Producto, p.Cantidad, p.FechaPedido 
+FROM Pedidos p
+JOIN Clientes c ON p.idClientes = c.idClientes
+JOIN Productos pr ON p.idProductos = pr.idProductos
+ORDER BY p.FechaPedido DESC";
+$result_pedidos = $conn->query($sql_pedidos);
+
+# Mostrar pedidos con precio total (cantidad * precio unitario)
+$sql_pedidos = "SELECT p.idPedidos, c.Nombre AS Cliente, pr.Nombre AS Producto, p.Cantidad, pr.Precio, p.FechaPedido 
+FROM Pedidos p
+JOIN Clientes c ON p.idClientes = c.idClientes
+JOIN Productos pr ON p.idProductos = pr.idProductos
+ORDER BY p.FechaPedido DESC";
+$result_pedidos = $conn->query($sql_pedidos);
+
+# Mostrar pedidos con precio total (cantidad * precio unitario)
+$sql_pedidos = "SELECT p.idPedidos, c.Nombre AS Cliente, pr.Nombre AS Producto, p.Cantidad, pr.Precio, p.FechaPedido 
 FROM Pedidos p
 JOIN Clientes c ON p.idClientes = c.idClientes
 JOIN Productos pr ON p.idProductos = pr.idProductos
@@ -90,15 +108,17 @@ $result_pedidos = $conn->query($sql_pedidos);
 if ($result_pedidos->num_rows > 0) {
     echo "<h2>Tabla de Pedidos</h2>";
     echo "<table border='1'>";
-    echo "<tr><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Fecha de Pedido</th><th>Acciones</th></tr>";
+    echo "<tr><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Precio Total</th><th>Fecha de Pedido</th><th>Acciones</th></tr>";
     while ($row = $result_pedidos->fetch_assoc()) {
+        $precio_total = $row["Cantidad"] * $row["Precio"];  # Calcular el precio total
         echo "<tr>";
         echo "<td>" . $row["Cliente"] . "</td>";
         echo "<td>" . $row["Producto"] . "</td>";
         echo "<td>" . $row["Cantidad"] . "</td>";
+        echo "<td>" . number_format($precio_total, 2) . "</td>";  # Mostrar precio total (formateado a dos decimales)
         echo "<td>" . $row["FechaPedido"] . "</td>";
         echo "<td>";
-        // Botón que mueve el pedido al total y lo elimina
+        # Botón que mueve el pedido al total y lo elimina
         echo "<form method='POST' action='completar.php' style='display:inline-block;'>";
         echo "<input type='hidden' name='pedido_id' value='" . $row["idPedidos"] . "'>";
         echo "<button type='submit' name='transferir_pedido'>Completar</button>";
@@ -110,7 +130,8 @@ if ($result_pedidos->num_rows > 0) {
 } else {
     echo "No hay pedidos disponibles.";
 }
-echo "</div>"; // Cierre del div content
+
+echo "</div>"; 
 echo "</body>";
 echo "</html>";
 ?>
