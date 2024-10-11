@@ -85,6 +85,7 @@ $conn->close();
     <a href='pedidos.php' class='active'>Agregar Pedidos</a>
     <a href='total.php'>Total de Pedidos</a>
     <a href='clientes.php'>Clientes</a>
+    <a href='productos.php'>Productos<a>
     <a href='index.php' style='float:right;'>Cerrar sesión</a>
 </div>
 
