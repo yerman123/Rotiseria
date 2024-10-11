@@ -28,6 +28,7 @@ $result_clientes = $conn->query($sql_clientes);
 <a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>
 <a href='total.php?section=total'>Total de Pedidos</a>
 <a href='clientes.php?section=clientes' class='active'>Clientes</a>
+<a href='productos.php'>Productos<a>
 <a href='index.php' style='float:right;'>Cerrar sesión</a>
 </div>
 
