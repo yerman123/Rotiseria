@@ -26,13 +26,14 @@ echo "<a href='inicio.php?section=inicio'>Inicio</a>";
 echo "<a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>";
 echo "<a href='total.php?section=total' class='active'>Total de Pedidos</a>";
 echo "<a href='clientes.php?section=clientes'>Clientes</a>";
+echo "<a href='productos.php?section=productos'>Productos<a>";
 echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";
 echo "</div>";
 echo "<div class='content'>";
 echo "<h1>Total de Pedidos</h1>";
 
 #MOSTRAR TABLA TOTAL
-$sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, prod.Nombre AS Producto, t.Cantidad 
+$sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, c.DNI AS DNICliente, prod.Nombre AS Producto, t.Cantidad 
 FROM Total t 
 INNER JOIN Clientes c ON t.idClientes = c.idClientes
 INNER JOIN Productos prod ON t.idProductos = prod.idProductos
@@ -46,6 +47,7 @@ if ($result_total) {
                 <th>ID Total</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
+                <th>DNI del Cliente</th> <!-- Nueva columna para el DNI -->
                 <th>Producto</th>
                 <th>Cantidad</th>
             </tr>";
@@ -54,6 +56,7 @@ if ($result_total) {
                     <td>" . $row["idTotal"] . "</td>
                     <td>" . $row["FechaPedido"] . "</td>
                     <td>" . $row["Cliente"] . "</td>
+                    <td>" . $row["DNICliente"] . "</td> <!-- Mostrar el DNI del cliente -->
                     <td>" . $row["Producto"] . "</td>
                     <td>" . $row["Cantidad"] . "</td>
                 </tr>";
