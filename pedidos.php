@@ -30,24 +30,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         if ($stmt_insert_cliente->execute()) {
             $idCliente = $stmt_insert_cliente->insert_id;
         } else {
-            echo "Error al agregar el cliente: " . $conn->error;
-            exit();
+            die("Error al agregar el cliente: " . $conn->error);
         }
     }
 
-    #INSERTAR PEDIDOS EN LA BASE DE DATOS
-    foreach ($productos as $index => $idProducto) {
-        $cantidad = $cantidades[$index]; # Obtener la cantidad correspondiente
+    # INSERTAR PEDIDOS EN LA BASE DE DATOS
+    foreach ($productos as $idProducto) {
+        $cantidad = intval($cantidades[$idProducto]);
+        if ($cantidad < 1) {
+            $cantidad = 1;  # Asegurar que la cantidad mínima es 1
+        }
         $sql_insert_pedido = "INSERT INTO Pedidos (idProductos, idClientes, Cantidad) VALUES (?, ?, ?)";
         $stmt_insert_pedido = $conn->prepare($sql_insert_pedido);
         $stmt_insert_pedido->bind_param("iii", $idProducto, $idCliente, $cantidad);
 
         if (!$stmt_insert_pedido->execute()) {
-            echo "Error al agregar el pedido: " . $conn->error;
+            die("Error al agregar el pedido: " . $conn->error);
         }
     }
 
-    #REDIRIGIR AL INICIO LUEGO DE QUE SE COMPLETEN LOS PEDIDOS
+    # Redirigir al inicio después de completar los pedidos
     header("Location: inicio.php");
     exit();
 }
@@ -84,8 +86,7 @@ $conn->close();
     <a href='inicio.php'>Inicio</a>
     <a href='pedidos.php' class='active'>Agregar Pedidos</a>
     <a href='total.php'>Total de Pedidos</a>
-    <a href='clientes.php'>Clientes</a>
-    <a href='productos.php'>Productos<a>
+    <a href='clientes.php?section=clientes'>Clientes</a>
     <a href='index.php' style='float:right;'>Cerrar sesión</a>
 </div>
 
@@ -101,25 +102,23 @@ $conn->close();
         <h3>Seleccionar Producto y Cantidad</h3>
 
         <?php foreach ($productos as $categoria => $items): ?>
-    <div class="categoria-producto">
-        <!-- Mostrar la imagen correspondiente a la categoría -->
-        <img src="images/<?php echo strtolower($categoria); ?>.png" alt="<?php echo $categoria; ?>" class="categoria-imagen">
-        
-        <!-- Aquí agregamos un div para agrupar el texto y las casillas de verificación debajo de la imagen -->
-        <div class="categoria-items">
-            <?php foreach ($items as $producto): ?>
-                <label>
-                    <input type="checkbox" name="productos[]" value="<?php echo $producto['idProductos']; ?>">
-                    <?php echo $producto['Nombre']; ?>
-                </label>
-                <label for="cantidad_<?php echo $producto['idProductos']; ?>">Cantidad:</label>
-                <input type="number" id="cantidad_<?php echo $producto['idProductos']; ?>" name="cantidades[]" value="1" min="1">
-                <br>
-            <?php endforeach; ?>
-        </div>
-    </div>
-<?php endforeach; ?>
-
+            <div class="categoria-producto">
+                <img src="images/<?php echo strtolower($categoria); ?>.png" alt="<?php echo $categoria; ?>" class="categoria-imagen">
+                
+                <div class="categoria-items">
+                    <?php foreach ($items as $producto): ?>
+                        <label>
+                            <input type="checkbox" name="productos[]" value="<?php echo $producto['idProductos']; ?>">
+                            <?php echo $producto['Nombre']; ?>
+                        </label>
+                        <label for="cantidad_<?php echo $producto['idProductos']; ?>">Cantidad:</label>
+                        <input type="number" id="cantidad_<?php echo $producto['idProductos']; ?>" 
+                            name="cantidades[<?php echo $producto['idProductos']; ?>]" value="1" min="1">
+                        <br>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 
     <input type="submit" value="Completar Pedido">
