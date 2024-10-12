@@ -41,6 +41,7 @@ $result_clientes = $conn->query($sql_clientes);
         <th>Dirección</th>
         <th>Teléfono</th>
         <th>Email</th>
+        <th>DNI</th>
     </tr>
     <?php
     if ($result_clientes->num_rows > 0) {
@@ -51,6 +52,7 @@ $result_clientes = $conn->query($sql_clientes);
             echo "<td>" . $row['Direccion'] . "</td>";
             echo "<td>" . $row['Telefono'] . "</td>";
             echo "<td>" . $row['Email'] . "</td>";
+            echo "<td>" . $row['DNI'] . "</td>";
             echo "</tr>";
         }
     } else {
