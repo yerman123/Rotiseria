@@ -55,6 +55,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         exit();
     }
 }
+
+if (isset($_POST['eliminar_pedido'])) {
+    $pedido_id = $_POST['pedido_id'];
+    
+    // Eliminar solo de la tabla pedidos
+    $stmt = $conn->prepare("DELETE FROM pedidos WHERE idPedidos = ?");
+    $stmt->bind_param("i", $pedido_id);
+    
+    if ($stmt->execute()) {
+        echo "Pedido eliminado correctamente.";
+    } else {
+        echo "Error al eliminar el pedido: " . $conn->error;
+    }
+    
+    // Recargar la página después de la eliminación
+    header("Location: inicio.php");
+    exit();
+}
+
+
+
+
 #navbar y bienvenida
 echo "<!DOCTYPE html>";
 echo "<html lang='es'>";
@@ -81,21 +103,6 @@ echo "</div>";
 echo "<div class='content'>";
 echo "<h1>¡Bienvenido, " . $_SESSION['username'] . "!</h1>";  
 
-#mostrar pedidos
-$sql_pedidos = "SELECT p.idPedidos, c.Nombre AS Cliente, pr.Nombre AS Producto, p.Cantidad, p.FechaPedido 
-FROM Pedidos p
-JOIN Clientes c ON p.idClientes = c.idClientes
-JOIN Productos pr ON p.idProductos = pr.idProductos
-ORDER BY p.FechaPedido DESC";
-$result_pedidos = $conn->query($sql_pedidos);
-
-# Mostrar pedidos con precio total (cantidad * precio unitario)
-$sql_pedidos = "SELECT p.idPedidos, c.Nombre AS Cliente, pr.Nombre AS Producto, p.Cantidad, pr.Precio, p.FechaPedido 
-FROM Pedidos p
-JOIN Clientes c ON p.idClientes = c.idClientes
-JOIN Productos pr ON p.idProductos = pr.idProductos
-ORDER BY p.FechaPedido DESC";
-$result_pedidos = $conn->query($sql_pedidos);
 
 # Mostrar pedidos con precio total (cantidad * precio unitario)
 $sql_pedidos = "SELECT p.idPedidos, c.Nombre AS Cliente, pr.Nombre AS Producto, p.Cantidad, pr.Precio, p.FechaPedido 
@@ -118,10 +125,22 @@ if ($result_pedidos->num_rows > 0) {
         echo "<td>" . number_format($precio_total, 2) . "</td>";  # Mostrar precio total (formateado a dos decimales)
         echo "<td>" . $row["FechaPedido"] . "</td>";
         echo "<td>";
-        # Botón que mueve el pedido al total y lo elimina
+        # Botón para completar el pedido
         echo "<form method='POST' action='completar.php' style='display:inline-block;'>";
         echo "<input type='hidden' name='pedido_id' value='" . $row["idPedidos"] . "'>";
         echo "<button type='submit' name='transferir_pedido'>Completar</button>";
+        echo "</form>";
+
+        # Botón para editar el pedido
+        echo "<form method='POST' action='editar_pedido.php' style='display:inline-block;'>";
+        echo "<input type='hidden' name='pedido_id' value='" . $row["idPedidos"] . "'>";
+        echo "<button type='submit' name='editar_pedido'>Editar</button>";
+        echo "</form>";
+
+        # Botón para eliminar el pedido
+        echo "<form method='POST' action='eliminar_pedido.php' style='display:inline-block;'>";
+        echo "<input type='hidden' name='pedido_id' value='" . $row["idPedidos"] . "'>";
+        echo "<button type='submit' name='eliminar_pedido'>Eliminar</button>";
         echo "</form>";
         echo "</td>";
         echo "</tr>";
