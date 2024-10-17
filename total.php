@@ -9,7 +9,27 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-#NAVBAR
+# Verificar si se ha enviado una solicitud para eliminar un pedido
+if (isset($_POST['eliminar_total'])) {
+    $idTotal = $_POST['idTotal'];
+
+    # Eliminar el pedido de la tabla Total
+    $sql_delete_total = "DELETE FROM Total WHERE idTotal = ?";
+    $stmt_delete = $conn->prepare($sql_delete_total);
+    $stmt_delete->bind_param("i", $idTotal);
+
+    if ($stmt_delete->execute()) {
+        echo "Pedido eliminado correctamente.";
+    } else {
+        echo "Error al eliminar el pedido: " . $conn->error;
+    }
+
+    # Recargar la página después de la eliminación
+    header("Location: total.php");
+    exit();
+}
+
+# NAVBAR
 echo "<!DOCTYPE html>";
 echo "<html lang='es'>";
 echo "<head>";
@@ -32,12 +52,13 @@ echo "</div>";
 echo "<div class='content'>";
 echo "<h1>Total de Pedidos</h1>";
 
-#MOSTRAR TABLA TOTAL
-$sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, c.DNI AS DNICliente, prod.Nombre AS Producto, t.Cantidad 
-FROM Total t 
-INNER JOIN Clientes c ON t.idClientes = c.idClientes
-INNER JOIN Productos prod ON t.idProductos = prod.idProductos
-ORDER BY t.FechaPedido DESC";
+# Mostrar tabla total con precios calculados
+$sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, c.DNI AS DNICliente, 
+              prod.Nombre AS Producto, t.Cantidad, prod.Precio, (t.Cantidad * prod.Precio) AS PrecioTotal
+              FROM Total t 
+              INNER JOIN Clientes c ON t.idClientes = c.idClientes
+              INNER JOIN Productos prod ON t.idProductos = prod.idProductos
+              ORDER BY t.FechaPedido DESC";
 $result_total = $conn->query($sql_total);
 
 if ($result_total) {
@@ -47,18 +68,29 @@ if ($result_total) {
                 <th>ID Total</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
-                <th>DNI del Cliente</th> <!-- Nueva columna para el DNI -->
+                <th>DNI del Cliente</th>
                 <th>Producto</th>
                 <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Precio Total</th>
+                <th>Acciones</th> <!-- Nueva columna para el botón de eliminar -->
             </tr>";
         while ($row = $result_total->fetch_assoc()) {
             echo "<tr>
                     <td>" . $row["idTotal"] . "</td>
                     <td>" . $row["FechaPedido"] . "</td>
                     <td>" . $row["Cliente"] . "</td>
-                    <td>" . $row["DNICliente"] . "</td> <!-- Mostrar el DNI del cliente -->
+                    <td>" . $row["DNICliente"] . "</td>
                     <td>" . $row["Producto"] . "</td>
                     <td>" . $row["Cantidad"] . "</td>
+                    <td>" . $row["Precio"] . "</td>
+                    <td>" . $row["PrecioTotal"] . "</td>
+                    <td>
+                        <form method='POST' action='total.php' style='display:inline-block;'>
+                            <input type='hidden' name='idTotal' value='" . $row["idTotal"] . "'>
+                            <button type='submit' name='eliminar_total'>Eliminar</button>
+                        </form>
+                    </td>
                 </tr>";
         }
         echo "</table><br>";
@@ -68,6 +100,21 @@ if ($result_total) {
     $result_total->free();
 } else {
     echo "Error en la consulta de total de pedidos: " . $conn->error . "<br>";
+}
+
+# Calcular y mostrar el total general de todos los pedidos
+$sql_suma_total = "SELECT SUM(t.Cantidad * prod.Precio) AS SumaTotal
+                    FROM Total t
+                    INNER JOIN Productos prod ON t.idProductos = prod.idProductos";
+$result_suma_total = $conn->query($sql_suma_total);
+
+if ($result_suma_total) {
+    $row_suma_total = $result_suma_total->fetch_assoc();
+    $total_general = $row_suma_total['SumaTotal'];
+    echo "<h2>Total de Todos los Pedidos: $" . number_format($total_general, 2) . "</h2>";
+    $result_suma_total->free();
+} else {
+    echo "Error al calcular el total general: " . $conn->error . "<br>";
 }
 
 echo "</div>"; 
