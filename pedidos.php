@@ -99,14 +99,7 @@ $conn->close();
 </head>
 <body>
 
-<div class='navbar'>
-    <a href='inicio.php'>Inicio</a>
-    <a href='pedidos.php' class='active'>Agregar Pedidos</a>
-    <a href='total.php'>Total de Pedidos</a>
-    <a href='clientes.php?section=clientes'>Clientes</a>
-    <a href='productos.php?section=productos'>Productos</a>
-    <a href='index.php' style='float:right;'>Cerrar sesión</a>
-</div>
+
 
 <h2 id="realizarpedido">Realizar Pedido</h2>
 
@@ -170,6 +163,15 @@ $conn->close();
         });
     }
 </script>
+
+<div class='navbar'>
+    <a href='inicio.php'>Inicio</a>
+    <a href='pedidos.php' class='active'>Agregar Pedidos</a>
+    <a href='total.php'>Total de Pedidos</a>
+    <a href='clientes.php?section=clientes'>Clientes</a>
+    <a href='productos.php?section=productos'>Productos</a>
+    <a href='index.php' style='float:right;'>Cerrar sesión</a>
+</div>
 
 </body>
 </html>
