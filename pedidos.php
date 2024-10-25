@@ -12,15 +12,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
     $cantidades = $_POST['cantidades'];
     $nombreCliente = $_POST['nombreCliente'];
 
-    # Dividir nombre y DNI
-    preg_match("/^(.*)\((\d+)\)$/", $nombreCliente, $matches);
-    $nombreCliente = trim($matches[1]);
-    $dniCliente = trim($matches[2]);
-
-    # Verificar si el cliente existe
-    $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ? AND DNI = ?";
+    #colocar cliente
+    $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ?";
     $stmt_cliente = $conn->prepare($sql_cliente);
-    $stmt_cliente->bind_param("ss", $nombreCliente, $dniCliente);
+    $stmt_cliente->bind_param("s", $nombreCliente);
     $stmt_cliente->execute();
     $result_cliente = $stmt_cliente->get_result();
 
@@ -28,10 +23,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         $row_cliente = $result_cliente->fetch_assoc();
         $idCliente = $row_cliente['idClientes'];
     } else {
-        # Agregar nuevo cliente si no existe
-        $sql_insert_cliente = "INSERT INTO Clientes (Nombre, DNI) VALUES (?, ?)";
+        #colocar nuevo cliente si no existe
+        $sql_insert_cliente = "INSERT INTO Clientes (Nombre) VALUES (?)";
         $stmt_insert_cliente = $conn->prepare($sql_insert_cliente);
-        $stmt_insert_cliente->bind_param("ss", $nombreCliente, $dniCliente);
+        $stmt_insert_cliente->bind_param("s", $nombreCliente);
         if ($stmt_insert_cliente->execute()) {
             $idCliente = $stmt_insert_cliente->insert_id;
         } else {
@@ -39,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         }
     }
 
-    # Insertar pedidos en la base de datos
+    # INSERTAR PEDIDOS EN LA BASE DE DATOS
     foreach ($productos as $idProducto) {
         $cantidad = intval($cantidades[$idProducto]);
         if ($cantidad < 1) {
@@ -59,19 +54,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
     exit();
 }
 
-# Consulta para obtener productos y clientes
+#CONSULTA PARA OBTENER LOS PRODUCTOS
 $sql_productos = "SELECT * FROM Productos";
 $result_productos = $conn->query($sql_productos);
-
 $sql_clientes = "SELECT Nombre, DNI FROM Clientes";
 $result_clientes = $conn->query($sql_clientes);
 
+
 $productos = [];
 if ($result_productos->num_rows > 0) {
-    while ($row = $result_productos->fetch_assoc()) {
-        # Agrupar por categoría
-        $categoria = explode(' ', $row["Nombre"])[0];
-        $productos[$categoria][] = $row;
+    while($row = $result_productos->fetch_assoc()) {
+        #AGRUPAR POR CATEGORÍA (asumiendo que la categoría es el primer término del nombre)
+        $categoria = explode(' ', $row["Nombre"])[0]; #por ejemplo: 'pizza' de 'pizza mozzarela'
+        $productos[$categoria][] = $row; #agrupar productos por categoría
     }
 }
 
@@ -86,16 +81,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realizar Pedido</title>
     <link rel="stylesheet" href="style/pedidos.css">
-    <link rel='stylesheet' href='style/navbar.css'>
-    <style>
-        .suggestion-item:hover {
-            background-color: #f2f2f2;
-            cursor: pointer;
-        }
-        .suggestion-item {
-            padding: 5px;
-        }
-    </style>
+    <link rel='stylesheet' href='style/navbar.css'> 
 </head>
 <body>
 
@@ -106,8 +92,7 @@ $conn->close();
 <form method="POST" action="pedidos.php">
     <div class="form-group">
         <label for="nombreCliente">Nombre del Cliente:</label>
-        <input type="text" id="nombreCliente" name="nombreCliente" oninput="mostrarSugerencias(this.value)" required>
-        <div id="sugerenciasClientes"></div>
+        <input type="text" id="nombreCliente" name="nombreCliente" required>
     </div>
 
     <div class="form-group">
@@ -125,7 +110,7 @@ $conn->close();
                         </label>
                         <label for="cantidad_<?php echo $producto['idProductos']; ?>">Cantidad:</label>
                         <input type="number" id="cantidad_<?php echo $producto['idProductos']; ?>" 
-                                name="cantidades[<?php echo $producto['idProductos']; ?>]" value="1" min="1">
+                            name="cantidades[<?php echo $producto['idProductos']; ?>]" value="1" min="1">
                         <br>
                     <?php endforeach; ?>
                 </div>
@@ -135,34 +120,6 @@ $conn->close();
 
     <input type="submit" value="Completar Pedido">
 </form>
-
-<script>
-    function mostrarSugerencias(valor) {
-        let sugerenciasDiv = document.getElementById("sugerenciasClientes");
-        sugerenciasDiv.innerHTML = "";  // Limpiar sugerencias previas
-
-        if (valor.length === 0) {
-            sugerenciasDiv.style.display = "none";
-            return;
-        }
-
-        fetch('buscar_clientes.php?q=' + valor)
-        .then(response => response.json())
-        .then(data => {
-            sugerenciasDiv.style.display = "block";
-            data.forEach(cliente => {
-                let opcion = document.createElement("div");
-                opcion.classList.add("suggestion-item");
-                opcion.textContent = cliente.Nombre + " (" + cliente.DNI + ")";
-                opcion.onclick = function() {
-                    document.getElementById("nombreCliente").value = cliente.Nombre + " (" + cliente.DNI + ")";
-                    sugerenciasDiv.style.display = "none";
-                };
-                sugerenciasDiv.appendChild(opcion);
-            });
-        });
-    }
-</script>
 
 <div class='navbar'>
     <a href='inicio.php'>Inicio</a>
