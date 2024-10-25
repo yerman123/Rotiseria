@@ -38,6 +38,7 @@ $result_clientes = $conn->query($sql_clientes);
     <tr>
         <th>ID Cliente</th>
         <th>Nombre</th>
+        <th>Apellido</th>
         <th>Dirección</th>
         <th>Teléfono</th>
         <th>Email</th>
@@ -49,6 +50,7 @@ $result_clientes = $conn->query($sql_clientes);
             echo "<tr>";
             echo "<td>" . $row['idClientes'] . "</td>";
             echo "<td>" . $row['Nombre'] . "</td>";
+            echo "<td>" . $row['Apellido']. "</td>";
             echo "<td>" . $row['Direccion'] . "</td>";
             echo "<td>" . $row['Telefono'] . "</td>";
             echo "<td>" . $row['Email'] . "</td>";
