@@ -63,7 +63,7 @@ $result_total = $conn->query($sql_total);
 
 if ($result_total) {
     if ($result_total->num_rows > 0) {
-        echo "<table border='1'>
+        echo "<table>
             <tr>
                 <th>ID Total</th>
                 <th>Fecha</th>
