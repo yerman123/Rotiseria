@@ -78,7 +78,7 @@ $section = isset($_GET['section']) ? $_GET['section'] : 'productos';
     echo "</div>";
     
     echo "<div class='content'>";
-    echo "<h1>¡Bienvenido, " . $_SESSION['username'] . "!</h1>";    
+
 
     // Sección de Productos
     if ($section == 'productos') {
@@ -89,18 +89,17 @@ $section = isset($_GET['section']) ? $_GET['section'] : 'productos';
         if ($result_productos->num_rows > 0) {
             echo "<h2>Tabla de Productos</h2>";
             echo "<table>";
-            echo "<tr><th>ID Producto</th><th>Producto</th><th>Precio</th><th>Descripcion</th><th>Acciones</th></tr>";
+            echo "<tr><th>Producto</th><th>Precio</th><th>Descripcion</th><th>Acciones</th></tr>";
             while($row = $result_productos->fetch_assoc()) {
                 echo "<tr>";
-                echo "<td>" . $row["idProductos"] . "</td>";
                 echo "<td>" . $row["Nombre"] . "</td>";
                 echo "<td>" . $row["Precio"] . "</td>";
                 echo "<td>" . $row["Descripcion"] . "</td>";
                 echo "<td>";
                 // Botón para editar el producto
-                echo "<a href='productos.php?section=editar&producto_id=" . $row["idProductos"] . "'>Editar</a>";
+                echo "<a href='productos.php?section=editar&producto_id=" . $row["idProductos"] . "'><button type='submit' name='editar_producto'>Editar</button></a>";
                 // Botón para eliminar el producto
-                echo " | <form method='POST' style='display:inline-block;'>";
+                echo "<form method='POST' style='display:inline-block;'>";
                 echo "<input type='hidden' name='producto_id' value='" . $row["idProductos"] . "'>";
                 echo "<button type='submit' name='eliminar_producto'>Eliminar</button>";
                 echo "</form>";
@@ -142,21 +141,38 @@ $section = isset($_GET['section']) ? $_GET['section'] : 'productos';
 
         if ($result_editar->num_rows == 1) {
             $row = $result_editar->fetch_assoc();
-
+        
             // Mostrar formulario para editar producto
+            echo "<div class='edit-product-form'>";
             echo "<h2>Editar Producto</h2>";
             echo "<form method='POST'>";
-            echo "<label for='Nombre'>Nombre:</label><br>";
-            echo "<input type='text' name='Nombre' value='" . $row['Nombre'] . "' required><br>";
-            echo "<label for='Precio'>Precio:</label><br>";
-            echo "<input type='number' step='0.01' name='Precio' value='" . $row['Precio'] . "' required><br>";
-            echo "<label for='Descripcion'>Descripción:</label><br>";
-            echo "<textarea name='Descripcion' required>" . $row['Descripcion'] . "</textarea><br>";
+            
+            echo "<div class='form-group'>";
+            echo "<label for='Nombre'>Nombre del Producto</label>";
+            echo "<input type='text' id='Nombre' name='Nombre' value='" . htmlspecialchars($row['Nombre']) . "' required>";
+            echo "</div>";
+            
+            echo "<div class='form-group'>";
+            echo "<label for='Precio'>Precio</label>";
+            echo "<input type='number' step='0.01' id='Precio' name='Precio' value='" . htmlspecialchars($row['Precio']) . "' required>";
+            echo "</div>";
+            
+            echo "<div class='form-group'>";
+            echo "<label for='Descripcion'>Descripción</label>";
+            echo "<textarea id='Descripcion' name='Descripcion' required>" . htmlspecialchars($row['Descripcion']) . "</textarea>";
+            echo "</div>";
+            
             echo "<input type='hidden' name='producto_id' value='" . $row['idProductos'] . "'>";
-            echo "<button type='submit' name='actualizar_producto'>Actualizar</button>";
+            
+            echo "<div class='button-container'>";
+            echo "<button type='submit' name='actualizar_producto'>Actualizar Producto</button>";
+            echo "<button type='button' onclick='window.location.href=\"productos.php?section=productos\"'>Cancelar</button>";
+            echo "</div>";
+            
             echo "</form>";
+            echo "</div>";
         } else {
-            echo "Producto no encontrado.";
+            echo "<p class='error-message'>Producto no encontrado.</p>";
         }
         $stmt_editar->close();
     }
