@@ -114,7 +114,7 @@ $result_pedidos = $conn->query($sql_pedidos);
 
 if ($result_pedidos->num_rows > 0) {
     echo "<h2>Tabla de Pedidos</h2>";
-    echo "<table border='1'>";
+    echo "<table>";
     echo "<tr><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Precio Total</th><th>Fecha de Pedido</th><th>Acciones</th></tr>";
     while ($row = $result_pedidos->fetch_assoc()) {
         $precio_total = $row["Cantidad"] * $row["Precio"];  # Calcular el precio total
