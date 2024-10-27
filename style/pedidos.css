@@ -1,9 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
 body {
     background-image: url('https://i.imgur.com/IAhbM3F.png');
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
-    font-family: 'Roboto', sans-serif;
+    background-position: center center;
+    background-attachment: fixed;
+    font-family: 'Poppins', sans-serif;
     color: #2b1d15;
     margin: 0;
     padding: 0;
@@ -62,7 +71,7 @@ label {
     color: #333333;
 }
 
-input[type="text"], input[type="number"] {
+input[type="text"], input[type="number"], input[type="num"] {
     background-color: #ffefc2;
     font-size: 16px;
     padding: 5px;
@@ -71,12 +80,12 @@ input[type="text"], input[type="number"] {
     transition: all 0.3s ease;
 }
 
-input[type="text"]:focus, input[type="number"]:focus {
+input[type="text"]:focus, input[type="number"]:focus, input[type="num"]:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(228, 73, 26, 0.3);
 }
 
-input[type="text"] {
+input[type="text"], input[type="num"] {
     width: 220px;
 }
 
