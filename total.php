@@ -65,7 +65,6 @@ if ($result_total) {
     if ($result_total->num_rows > 0) {
         echo "<table>
             <tr>
-                <th>ID Total</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>DNI del Cliente</th>
@@ -77,7 +76,6 @@ if ($result_total) {
             </tr>";
         while ($row = $result_total->fetch_assoc()) {
             echo "<tr>
-                    <td>" . $row["idTotal"] . "</td>
                     <td>" . $row["FechaPedido"] . "</td>
                     <td>" . $row["Cliente"] . "</td>
                     <td>" . $row["DNICliente"] . "</td>
