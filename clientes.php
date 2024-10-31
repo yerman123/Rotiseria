@@ -124,24 +124,24 @@ if ($section == 'editar' && isset($_GET['cliente_id'])) {
         echo "<div class='form-row'>";
         echo "<div class='form-group'>";
         echo "<label for='Email'>Email</label>";
-        echo "<input type='email' id='Email' name='Email' value='" . htmlspecialchars($row['Email']) . "' required>";
+        echo "<input type='email' id='Email' name='Email' value='" . htmlspecialchars($row['Email']) . "'>";
         echo "</div>";
         
         echo "<div class='form-group'>";
         echo "<label for='DNI'>DNI</label>";
-        echo "<input type='text' id='DNI' name='DNI' value='" . htmlspecialchars($row['DNI']) . "' required>";
+        echo "<input type='text' id='DNI' name='DNI' value='" . htmlspecialchars($row['DNI']) . "'>";
         echo "</div>";
         echo "</div>";
         
         echo "<div class='form-row'>";
         echo "<div class='form-group'>";
         echo "<label for='Telefono'>Teléfono</label>";
-        echo "<input type='tel' id='Telefono' name='Telefono' value='" . htmlspecialchars($row['Telefono']) . "' required>";
+        echo "<input type='tel' id='Telefono' name='Telefono' value='" . htmlspecialchars($row['Telefono']) . "'>";
         echo "</div>";
         
         echo "<div class='form-group'>";
         echo "<label for='Direccion'>Dirección</label>";
-        echo "<input type='text' id='Direccion' name='Direccion' value='" . htmlspecialchars($row['Direccion']) . "' required>";
+        echo "<input type='text' id='Direccion' name='Direccion' value='" . htmlspecialchars($row['Direccion']) . "'>";
         echo "</div>";
         echo "</div>";
         
