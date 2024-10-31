@@ -57,16 +57,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
 #CONSULTA PARA OBTENER LOS PRODUCTOS
 $sql_productos = "SELECT * FROM Productos";
 $result_productos = $conn->query($sql_productos);
-$sql_clientes = "SELECT Nombre, DNI FROM Clientes";
+$sql_clientes = "SELECT Nombre, Apellido, Telefono FROM Clientes";
 $result_clientes = $conn->query($sql_clientes);
-
 
 $productos = [];
 if ($result_productos->num_rows > 0) {
-    while($row = $result_productos->fetch_assoc()) {
-        #AGRUPAR POR CATEGORÍA (asumiendo que la categoría es el primer término del nombre)
-        $categoria = explode(' ', $row["Nombre"])[0]; #por ejemplo: 'pizza' de 'pizza mozzarela'
-        $productos[$categoria][] = $row; #agrupar productos por categoría
+    while ($row = $result_productos->fetch_assoc()) {
+        $categoria = explode(' ', $row["Nombre"])[0];
+        $productos[$categoria][] = $row;
     }
 }
 
@@ -85,23 +83,27 @@ $conn->close();
 </head>
 <body>
 
-
-
 <h2 id="realizarpedido">Realizar Pedido</h2>
 
 <form method="POST" action="pedidos.php">
     <div class="form-group">
         <label for="nombreCliente">Nombre del Cliente:</label>
-        <input type="text" id="nombreCliente" name="nombreCliente" required>
+        <input type="text" id="nombreCliente" name="nombreCliente" required pattern="[A-Za-z\s]+" title="Solo letras y espacios permitidos" 
+            list="clientes_sugeridos">
+        <datalist id="clientes_sugeridos">
+            <?php while ($row = $result_clientes->fetch_assoc()): ?>
+                <option value="<?php echo $row['Nombre']; ?>">
+                    <?php echo $row['Nombre'] . " " . $row['Apellido'] . " - " . $row['Telefono']; ?>
+                </option>
+            <?php endwhile; ?>
+        </datalist>
     </div>
 
     <div class="form-group">
         <h3>Seleccionar Producto y Cantidad</h3>
-
         <?php foreach ($productos as $categoria => $items): ?>
             <div class="categoria-producto">
                 <img src="images/<?php echo strtolower($categoria); ?>.png" alt="<?php echo $categoria; ?>" class="categoria-imagen">
-                
                 <div class="categoria-items">
                     <?php foreach ($items as $producto): ?>
                         <label>
