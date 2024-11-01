@@ -2,51 +2,40 @@
 include("conexion.php");
 session_start();
 
-# INICIO DE SESIÓN
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    # Verificación del formato del nombre de usuario
-    if (!preg_match("/^[a-zA-Z]+$/", $username)) {
-        echo "El nombre de usuario solo debe contener letras.";
-        exit();
-    }
-
-    # Verificar si el usuario existe en la base de datos
-    $stmt = $conn->prepare("SELECT * FROM personas WHERE Usuario = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows == 0) {
-        echo "El usuario no existe en la base de datos.";
-        exit();
-    }
-
-    # Verificar si el usuario y la contraseña coinciden
-    $stmt = $conn->prepare("SELECT * FROM personas WHERE Usuario = ? AND Clave = ?");
-    $stmt->bind_param("ss", $username, $password);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-        $_SESSION['username'] = $row['Usuario'];
-        header("Location: inicio.php");
-        exit();
-    } else {
-        echo "Usuario o clave incorrectos.";
-        exit();
-    }
-
-    $stmt->close();
-} else {
-    if (!isset($_SESSION['username'])) {
-        header("Location: index.php");
-        exit();
-    }
+// Verificar si la sesión está activa y es válida
+if (!isset($_SESSION['username']) || empty($_SESSION['username'])) {
+    // No hay sesión activa, redirigir al login
+    header("Location: index.php");
+    exit();
 }
+
+// Verificar el tiempo de inactividad (30 minutos)
+$inactive = 1800; // 30 minutos en segundos
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $inactive)) {
+    // Si pasó más tiempo del permitido
+    session_unset();     // Eliminar todas las variables de sesión
+    session_destroy();   // Destruir la sesión
+    header("Location: index.php?timeout=1");
+    exit();
+}
+
+// Verificar el tiempo máximo de sesión (8 horas)
+$maxLifetime = 28800; // 8 horas en segundos
+if (isset($_SESSION['created']) && (time() - $_SESSION['created'] > $maxLifetime)) {
+    session_unset();
+    session_destroy();
+    header("Location: index.php?expired=1");
+    exit();
+}
+
+// Actualizar el tiempo de última actividad
+$_SESSION['last_activity'] = time();
+
+// Establecer headers para prevenir caché
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header('Expires: Sun, 02 Jan 1990 00:00:00 GMT');
 
 # Navbar y bienvenida
 echo "<!DOCTYPE html>";
@@ -69,11 +58,11 @@ echo "<a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>";
 echo "<a href='total.php?section=total'>Total de Pedidos</a>";
 echo "<a href='clientes.php?section=clientes'>Clientes</a>";
 echo "<a href='productos.php?section=productos'>Productos</a>";
-echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";
+echo "<a href='logout.php' style='float:right;'>Cerrar sesión</a>";
 echo "</div>";
 
 echo "<div class='content'>";
-echo "<h1>¡Bienvenido, " . $_SESSION['username'] . "!🍕</h1>";  
+echo "<h1>¡Bienvenido, " . htmlspecialchars($_SESSION['username']) . "!🍕</h1>";  
 
 # Consultar pedidos y sumar precios por cliente
 $sql_pedidos = "SELECT c.Nombre AS Cliente, c.Apellido, pr.Nombre AS Producto, p.Cantidad, pr.Precio, p.FechaPedido, p.idPedidos, 
@@ -88,10 +77,9 @@ $pedidosPorCliente = [];
 $totalPorCliente = [];
 if ($result_pedidos->num_rows > 0) {
     while ($row = $result_pedidos->fetch_assoc()) {
-        $cliente = $row['Cliente'] . ' ' . $row['Apellido'];
+        $cliente = htmlspecialchars($row['Cliente'] . ' ' . $row['Apellido']);
         $pedidosPorCliente[$cliente][] = $row;
 
-        # Acumular el precio total para cada cliente
         if (!isset($totalPorCliente[$cliente])) {
             $totalPorCliente[$cliente] = 0;
         }
@@ -108,21 +96,21 @@ if (count($pedidosPorCliente) > 0) {
         echo "<tr><th>Producto</th><th>Cantidad</th><th>Precio Total</th><th>Fecha de Pedido</th><th>Acciones</th></tr>";
         foreach ($pedidos as $pedido) {
             echo "<tr>";
-            echo "<td>" . $pedido['Producto'] . "</td>";
-            echo "<td>" . $pedido['Cantidad'] . "</td>";
+            echo "<td>" . htmlspecialchars($pedido['Producto']) . "</td>";
+            echo "<td>" . htmlspecialchars($pedido['Cantidad']) . "</td>";
             echo "<td>" . number_format($pedido['PrecioTotalProducto'], 2) . "</td>";
-            echo "<td>" . $pedido['FechaPedido'] . "</td>";
+            echo "<td>" . htmlspecialchars($pedido['FechaPedido']) . "</td>";
             echo "<td>";
             echo "<form method='POST' action='completar.php' style='display:inline-block;'>";
-            echo "<input type='hidden' name='pedido_id' value='" . $pedido["idPedidos"] . "'>";
+            echo "<input type='hidden' name='pedido_id' value='" . htmlspecialchars($pedido["idPedidos"]) . "'>";
             echo "<button type='submit' name='transferir_pedido'>Completar</button>";
             echo "</form>";
             echo "<form method='POST' action='editar_pedido.php' style='display:inline-block;'>";
-            echo "<input type='hidden' name='pedido_id' value='" . $pedido["idPedidos"] . "'>";
+            echo "<input type='hidden' name='pedido_id' value='" . htmlspecialchars($pedido["idPedidos"]) . "'>";
             echo "<button type='submit' name='editar_pedido'>Editar</button>";
             echo "</form>";
             echo "<form method='POST' action='eliminar_pedido.php' style='display:inline-block;'>";
-            echo "<input type='hidden' name='pedido_id' value='" . $pedido["idPedidos"] . "'>";
+            echo "<input type='hidden' name='pedido_id' value='" . htmlspecialchars($pedido["idPedidos"]) . "'>";
             echo "<button type='submit' name='eliminar_pedido'>Eliminar</button>";
             echo "</form>";
             echo "</td>";
