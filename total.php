@@ -46,11 +46,25 @@ echo "<a href='inicio.php?section=inicio'>Inicio</a>";
 echo "<a href='pedidos.php?section=pedidos'>Agregar Pedidos</a>";
 echo "<a href='total.php?section=total' class='active'>Total de Pedidos</a>";
 echo "<a href='clientes.php?section=clientes'>Clientes</a>";
-echo "<a href='productos.php?section=productos'>Productos<a>";
+echo "<a href='productos.php?section=productos'>Productos</a>";
 echo "<a href='index.php' style='float:right;'>Cerrar sesión</a>";
 echo "</div>";
 echo "<div class='content'>";
 echo "<h1>Total de Pedidos</h1>";
+
+# Formulario de filtro
+echo "<form method='POST' action='total.php' class='filter-form'>";
+echo "<label for='filtro_dia'>Filtrar:</label>";
+echo "<input type='date' id='filtro_dia' name='filtro_dia'>";
+echo "<button type='submit' name='filtrar'>Aplicar Filtro</button>";
+echo "</form>";
+
+# Condición de filtro por mes o por día
+$where_clause = '';
+if (!empty($_POST['filtro_dia'])) {
+        $filtro_dia = $_POST['filtro_dia'];
+        $where_clause = "WHERE DATE(t.FechaPedido) = '$filtro_dia'";
+    }
 
 # Mostrar tabla total con precios calculados
 $sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, c.DNI AS DNICliente, 
@@ -58,6 +72,7 @@ $sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, c.DNI AS DNI
               FROM Total t 
               INNER JOIN Clientes c ON t.idClientes = c.idClientes
               INNER JOIN Productos prod ON t.idProductos = prod.idProductos
+              $where_clause
               ORDER BY t.FechaPedido DESC";
 $result_total = $conn->query($sql_total);
 
@@ -65,6 +80,7 @@ if ($result_total) {
     if ($result_total->num_rows > 0) {
         echo "<table>
             <tr>
+                <th>ID Total</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>DNI del Cliente</th>
@@ -72,10 +88,11 @@ if ($result_total) {
                 <th>Cantidad</th>
                 <th>Precio Unitario</th>
                 <th>Precio Total</th>
-                <th>Acciones</th> <!-- Nueva columna para el botón de eliminar -->
+                <th>Acciones</th>
             </tr>";
         while ($row = $result_total->fetch_assoc()) {
             echo "<tr>
+                    <td>" . $row["idTotal"] . "</td>
                     <td>" . $row["FechaPedido"] . "</td>
                     <td>" . $row["Cliente"] . "</td>
                     <td>" . $row["DNICliente"] . "</td>
@@ -93,17 +110,18 @@ if ($result_total) {
         }
         echo "</table><br>";
     } else {
-        echo "No hay pedidos completados.<br>";
+        echo "No hay pedidos completados para el filtro seleccionado.<br>";
     }
     $result_total->free();
 } else {
     echo "Error en la consulta de total de pedidos: " . $conn->error . "<br>";
 }
 
-# Calcular y mostrar el total general de todos los pedidos
+# Calcular y mostrar el total general de todos los pedidos (aplicando el filtro)
 $sql_suma_total = "SELECT SUM(t.Cantidad * prod.Precio) AS SumaTotal
                     FROM Total t
-                    INNER JOIN Productos prod ON t.idProductos = prod.idProductos";
+                    INNER JOIN Productos prod ON t.idProductos = prod.idProductos
+                    $where_clause";
 $result_suma_total = $conn->query($sql_suma_total);
 
 if ($result_suma_total) {
