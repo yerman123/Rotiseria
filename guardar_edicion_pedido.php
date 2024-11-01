@@ -1,31 +1,25 @@
 <?php
 include("conexion.php");
 
-# Verificar si se ha enviado el formulario de guardado
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pedido_id'])) {
     $pedido_id = $_POST['pedido_id'];
-    $cliente = $_POST['cliente'];
-    $producto = $_POST['producto'];
+    $producto_id = $_POST['producto_id'];
     $cantidad = $_POST['cantidad'];
 
-    # Actualizar el pedido en la base de datos
-    $sql_update = "UPDATE Pedidos p
-    JOIN Clientes c ON p.idClientes = c.idClientes
-    JOIN Productos pr ON p.idProductos = pr.idProductos
-    SET c.Nombre = ?, pr.Nombre = ?, p.Cantidad = ?
-    WHERE p.idPedidos = ?";
+    // Actualizar pedido con el nuevo id de producto y cantidad
+    $sql_update = "UPDATE Pedidos SET idProductos = ?, Cantidad = ? WHERE idPedidos = ?";
     $stmt = $conn->prepare($sql_update);
-    $stmt->bind_param("ssii", $cliente, $producto, $cantidad, $pedido_id);
+    $stmt->bind_param("iii", $producto_id, $cantidad, $pedido_id);
 
     if ($stmt->execute()) {
-        header("Location: inicio.php");  # Redirigir a la página principal
+        // Redirecciona de vuelta a la página de pedidos o a otra página
+        header("Location: inicio.php");
         exit();
     } else {
-        echo "Error al actualizar el pedido: " . $conn->error;
+        echo "Error al actualizar el pedido.";
     }
 
     $stmt->close();
 }
-
 $conn->close();
 ?>
