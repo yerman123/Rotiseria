@@ -1,21 +1,23 @@
 <?php
 include("conexion.php");
 
-#verificar la conexión
+# Verificar la conexión
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
 }
 
-#verificar si se envió un pedido
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset($_POST['nombreCliente'])) {
+# Verificar si se envió un pedido
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset($_POST['nombreCliente']) && isset($_POST['apellidoCliente']) && isset($_POST['telefonoCliente'])) {
     $productos = $_POST['productos'];
     $cantidades = $_POST['cantidades'];
     $nombreCliente = $_POST['nombreCliente'];
+    $apellidoCliente = $_POST['apellidoCliente'];
+    $telefonoCliente = '+' . $_POST['telefonoCliente'];
 
-    #colocar cliente
-    $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ?";
+    // Consulta para verificar si el cliente ya existe por nombre y apellido
+    $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ? AND Apellido = ?";
     $stmt_cliente = $conn->prepare($sql_cliente);
-    $stmt_cliente->bind_param("s", $nombreCliente);
+    $stmt_cliente->bind_param("ss", $nombreCliente, $apellidoCliente);
     $stmt_cliente->execute();
     $result_cliente = $stmt_cliente->get_result();
 
@@ -23,10 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         $row_cliente = $result_cliente->fetch_assoc();
         $idCliente = $row_cliente['idClientes'];
     } else {
-        #colocar nuevo cliente si no existe
-        $sql_insert_cliente = "INSERT INTO Clientes (Nombre) VALUES (?)";
+        // Inserta un nuevo cliente si no existe
+        $sql_insert_cliente = "INSERT INTO Clientes (Nombre, Apellido, Telefono) VALUES (?, ?, ?)";
         $stmt_insert_cliente = $conn->prepare($sql_insert_cliente);
-        $stmt_insert_cliente->bind_param("s", $nombreCliente);
+        $stmt_insert_cliente->bind_param("sss", $nombreCliente, $apellidoCliente, $telefonoCliente);
         if ($stmt_insert_cliente->execute()) {
             $idCliente = $stmt_insert_cliente->insert_id;
         } else {
@@ -34,11 +36,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         }
     }
 
-    # INSERTAR PEDIDOS EN LA BASE DE DATOS
+    // INSERTAR PEDIDOS EN LA BASE DE DATOS
     foreach ($productos as $idProducto) {
         $cantidad = intval($cantidades[$idProducto]);
         if ($cantidad < 1) {
-            $cantidad = 1;  # Asegurar que la cantidad mínima es 1
+            $cantidad = 1;
         }
         $sql_insert_pedido = "INSERT INTO Pedidos (idProductos, idClientes, Cantidad) VALUES (?, ?, ?)";
         $stmt_insert_pedido = $conn->prepare($sql_insert_pedido);
@@ -49,12 +51,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         }
     }
 
-    # Redirigir al inicio después de completar los pedidos
     header("Location: inicio.php");
     exit();
 }
 
-#CONSULTA PARA OBTENER LOS PRODUCTOS
+
+# Consulta para obtener los productos
 $sql_productos = "SELECT * FROM Productos";
 $result_productos = $conn->query($sql_productos);
 $sql_clientes = "SELECT Nombre, Apellido, Telefono FROM Clientes";
@@ -88,16 +90,26 @@ $conn->close();
 <form method="POST" action="pedidos.php">
     <div class="form-group">
         <label for="nombreCliente">Nombre del Cliente:</label>
-        <input type="text" id="nombreCliente" name="nombreCliente" required pattern="[A-Za-z\s]+" title="Solo letras y espacios permitidos" 
-            list="clientes_sugeridos">
-        <datalist id="clientes_sugeridos">
-            <?php while ($row = $result_clientes->fetch_assoc()): ?>
-                <option value="<?php echo $row['Nombre']; ?>">
-                    <?php echo $row['Nombre'] . " " . $row['Apellido'] . " - " . $row['Telefono']; ?>
-                </option>
-            <?php endwhile; ?>
-        </datalist>
+        <input type="text" id="nombreCliente" name="nombreCliente" required pattern="[A-Za-z\s]+" title="Solo letras y espacios permitidos" list="clientes_sugeridos">
     </div>
+
+    <div class="form-group">
+        <label for="apellidoCliente">Apellido del Cliente:</label>
+        <input type="text" id="apellidoCliente" name="apellidoCliente"  pattern="[A-Za-z\s]+" title="Solo letras y espacios permitidos">
+    </div>
+
+    <div class="form-group">
+        <label for="telefonoCliente">Teléfono de Cliente:</label>
+        <input type="text" id="telefonoCliente" name="telefonoCliente"  pattern="[0-9]+" title="Solo números permitidos">
+    </div>
+
+    <datalist id="clientes_sugeridos">
+        <?php while ($row = $result_clientes->fetch_assoc()): ?>
+            <option value="<?php echo $row['Nombre']; ?>">
+                <?php echo $row['Nombre'] . " " . $row['Apellido'] . " - " . $row['Telefono']; ?>
+            </option>
+        <?php endwhile; ?>
+    </datalist>
 
     <div class="form-group">
         <h3>Seleccionar Producto y Cantidad</h3>
