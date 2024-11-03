@@ -69,6 +69,27 @@ include("conexion.php");
             text-align: center;
             margin-top: 20px;
         }
+        .form-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: white;
+            appearance: none; /* Oculta el ícono de flecha predeterminado en algunos navegadores */
+            -webkit-appearance: none; /* Oculta el ícono de flecha en Safari */
+            -moz-appearance: none; /* Oculta el ícono de flecha en Firefox */
+            font-size: 1rem;
+        }
+
+/* Estilos opcionales para agregar un ícono de flecha personalizado */
+        .form-select {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1em;
+        }
+
     </style>
 
     <div class="container">
@@ -106,7 +127,7 @@ include("conexion.php");
 
                     <div class="form-group">
                         <label for="producto">Producto:</label>
-                        <select id="producto" name="producto_id" required onchange="actualizarPrecio()">
+                        <select id="producto" name="producto_id" class="form-select" required onchange="actualizarPrecio()">
                             <option value="">Seleccione un producto</option>
                             <?php while ($producto = $productos_result->fetch_assoc()) { ?>
                                 <option value="<?php echo $producto['idProductos']; ?>" 
