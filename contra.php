@@ -140,7 +140,7 @@
 
             if ($result->num_rows == 1) {
                 // Si el usuario y el dni coinciden, redirigir a una página para cambiar la contraseña
-                echo "El nombre de usuario y el DNI son correctos.<br>";
+                echo "El nombre de usuario y el DNI son correctos.✅<br>";
                 echo '<form action="cambiar_clave.php" method="POST">';
                 echo '<input type="hidden" name="Usuario" value="'.htmlspecialchars($username).'">';
                 echo '<input type="password" name="NuevaClave" placeholder="Nueva Contraseña" required>';
