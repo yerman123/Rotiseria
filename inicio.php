@@ -122,12 +122,11 @@ if (count($pedidosPorCliente) > 0) {
     echo "No hay pedidos disponibles.";
 }
 
-echo "<button class='faq-button' onclick=\"window.location.href='https://wa.me/5493644612371?text=Hola,%20necesito%20ayuda%20con%20el%20sistema%20´El%20Buitre%20Delivery´.'\">";
+echo "<button class='faq-button' onclick=\"window.location.href='whatsapp://send?phone=5493644612371&text=Hola,%20necesito%20ayuda%20con%20el%20sistema%20El%20Buitre%20Delivery'\">";
 echo "    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'>";
 echo "        <path d='M80 160c0-35.3 28.7-64 64-64h32c35.3 0 64 28.7 64 64v3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74V320c0 17.7 14.3 32 32 32s32-14.3 32-32v-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7V160c0-70.7-57.3-128-128-128H144C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z'></path>";
 echo "    </svg>";
-echo "    <span class='tooltip'>Contactanos por ayuda al: (+5493644612371)</span>";
-echo "</button>";
+echo "    <span class='tooltip'>Contactanos por ayuda al: (número)</span>";
 
 echo "</div>"; 
 echo "</body>";
