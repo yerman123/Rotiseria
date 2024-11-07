@@ -7,17 +7,22 @@ if ($conn->connect_error) {
 }
 
 # Verificar si se envió un pedido
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset($_POST['nombreCliente']) && isset($_POST['apellidoCliente']) && isset($_POST['telefonoCliente'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset($_POST['nombreCliente'])) {
     $productos = $_POST['productos'];
     $cantidades = $_POST['cantidades'];
     $nombreCliente = $_POST['nombreCliente'];
-    $apellidoCliente = $_POST['apellidoCliente'];
-    $telefonoCliente = '+' . $_POST['telefonoCliente'];
 
-    // Consulta para verificar si el cliente ya existe por nombre y apellido
-    $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ? AND Apellido = ?";
+    # Establecer si el pedido es una reserva
+    $esReserva = isset($_POST['reserva']) && $_POST['reserva'] == '1' ? 1 : 0;
+    $fechaEntrega = $esReserva && !empty($_POST['fecha_entrega']) ? $_POST['fecha_entrega'] : null;
+
+    // Verificar si `$esReserva` llega correctamente
+    var_dump($esReserva); // Esto mostrará si `$esReserva` es 1 o 0. Eliminar después de la prueba.
+
+    # Colocar cliente
+    $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ?";
     $stmt_cliente = $conn->prepare($sql_cliente);
-    $stmt_cliente->bind_param("ss", $nombreCliente, $apellidoCliente);
+    $stmt_cliente->bind_param("s", $nombreCliente);
     $stmt_cliente->execute();
     $result_cliente = $stmt_cliente->get_result();
 
@@ -25,10 +30,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         $row_cliente = $result_cliente->fetch_assoc();
         $idCliente = $row_cliente['idClientes'];
     } else {
-        // Inserta un nuevo cliente si no existe
-        $sql_insert_cliente = "INSERT INTO Clientes (Nombre, Apellido, Telefono) VALUES (?, ?, ?)";
+        # Colocar nuevo cliente si no existe
+        $sql_insert_cliente = "INSERT INTO Clientes (Nombre) VALUES (?)";
         $stmt_insert_cliente = $conn->prepare($sql_insert_cliente);
-        $stmt_insert_cliente->bind_param("sss", $nombreCliente, $apellidoCliente, $telefonoCliente);
+        $stmt_insert_cliente->bind_param("s", $nombreCliente);
         if ($stmt_insert_cliente->execute()) {
             $idCliente = $stmt_insert_cliente->insert_id;
         } else {
@@ -36,27 +41,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         }
     }
 
-    // INSERTAR PEDIDOS EN LA BASE DE DATOS
+# INSERTAR PEDIDOS EN LA BASE DE DATOS
     foreach ($productos as $idProducto) {
         $cantidad = intval($cantidades[$idProducto]);
         if ($cantidad < 1) {
-            $cantidad = 1;
+            $cantidad = 1;  # Asegurar que la cantidad mínima es 1
         }
-        $sql_insert_pedido = "INSERT INTO Pedidos (idProductos, idClientes, Cantidad) VALUES (?, ?, ?)";
+        
+        // Cambiar "Reserva" a "reservado" en la consulta
+        $sql_insert_pedido = "INSERT INTO Pedidos (idProductos, idClientes, Cantidad, reservado, Fecha_Entrega) VALUES (?, ?, ?, ?, ?)";
         $stmt_insert_pedido = $conn->prepare($sql_insert_pedido);
-        $stmt_insert_pedido->bind_param("iii", $idProducto, $idCliente, $cantidad);
+        $stmt_insert_pedido->bind_param("iiiss", $idProducto, $idCliente, $cantidad, $esReserva, $fechaEntrega);
 
         if (!$stmt_insert_pedido->execute()) {
             die("Error al agregar el pedido: " . $conn->error);
         }
     }
 
+
+    # Redirigir al inicio después de completar los pedidos
     header("Location: inicio.php");
     exit();
 }
 
 
-# Consulta para obtener los productos
+# CONSULTA PARA OBTENER LOS PRODUCTOS
 $sql_productos = "SELECT * FROM Productos";
 $result_productos = $conn->query($sql_productos);
 $sql_clientes = "SELECT Nombre, Apellido, Telefono FROM Clientes";
@@ -72,6 +81,7 @@ if ($result_productos->num_rows > 0) {
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -90,26 +100,16 @@ $conn->close();
 <form method="POST" action="pedidos.php">
     <div class="form-group">
         <label for="nombreCliente">Nombre del Cliente:</label>
-        <input type="text" id="nombreCliente" name="nombreCliente" required pattern="[A-Za-z\s]+" title="Solo letras y espacios permitidos" list="clientes_sugeridos">
+        <input type="text" id="nombreCliente" name="nombreCliente" required pattern="[A-Za-z\s]+" title="Solo letras y espacios permitidos" 
+            list="clientes_sugeridos">
+        <datalist id="clientes_sugeridos">
+            <?php while ($row = $result_clientes->fetch_assoc()): ?>
+                <option value="<?php echo $row['Nombre']; ?>">
+                    <?php echo $row['Nombre'] . " " . $row['Apellido'] . " - " . $row['Telefono']; ?>
+                </option>
+            <?php endwhile; ?>
+        </datalist>
     </div>
-
-    <div class="form-group">
-        <label for="apellidoCliente">Apellido del Cliente:</label>
-        <input type="text" id="apellidoCliente" name="apellidoCliente"  pattern="[A-Za-z\s]+" title="Solo letras y espacios permitidos">
-    </div>
-
-    <div class="form-group">
-        <label for="telefonoCliente">Teléfono de Cliente:</label>
-        <input type="text" id="telefonoCliente" name="telefonoCliente"  pattern="[0-9]+" title="Solo números permitidos">
-    </div>
-
-    <datalist id="clientes_sugeridos">
-        <?php while ($row = $result_clientes->fetch_assoc()): ?>
-            <option value="<?php echo $row['Nombre']; ?>">
-                <?php echo $row['Nombre'] . " " . $row['Apellido'] . " - " . $row['Telefono']; ?>
-            </option>
-        <?php endwhile; ?>
-    </datalist>
 
     <div class="form-group">
         <h3>Seleccionar Producto y Cantidad</h3>
@@ -132,8 +132,26 @@ $conn->close();
         <?php endforeach; ?>
     </div>
 
+    <div class="form-group">
+        <label for="reserva">¿Es una reserva?</label>
+        <input type="checkbox" id="reserva" name="reserva" value="1">
+    </div>
+
+    <!-- Campo de Fecha de Entrega (solo se muestra si es una reserva) -->
+    <div class="form-group" id="fecha-entrega-group" style="display: none;">
+        <label for="fecha_entrega">Fecha de Entrega:</label>
+        <input type="date" id="fecha_entrega" name="fecha_entrega">
+    </div>
+
     <input type="submit" value="Completar Pedido">
 </form>
+
+<script>
+    // Mostrar/Ocultar el campo de fecha según el estado de reserva
+    document.getElementById('reserva').addEventListener('change', function() {
+        document.getElementById('fecha-entrega-group').style.display = this.checked ? 'block' : 'none';
+    });
+</script>
 
 <div class='navbar'>
     <a href='inicio.php'>Inicio</a>
