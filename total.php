@@ -1,7 +1,5 @@
 <?php
 include("conexion.php");
-header('Content-Type: text/html; charset=utf-8');
-
 session_start();
 
 if (!isset($_SESSION['username'])) {
@@ -9,27 +7,21 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-# Verificar si se ha enviado una solicitud para eliminar un pedido
+// Proceso de eliminación de pedidos
 if (isset($_POST['eliminar_total'])) {
     $idTotal = $_POST['idTotal'];
-
-    # Eliminar el pedido de la tabla Total
     $sql_delete_total = "DELETE FROM Total WHERE idTotal = ?";
     $stmt_delete = $conn->prepare($sql_delete_total);
     $stmt_delete->bind_param("i", $idTotal);
-
     if ($stmt_delete->execute()) {
-        echo "Pedido eliminado correctamente.";
+        echo "<script>alert('Pedido eliminado correctamente.'); window.location.href = 'total.php';</script>";
     } else {
         echo "Error al eliminar el pedido: " . $conn->error;
     }
-
-    # Recargar la página después de la eliminación
-    header("Location: total.php");
     exit();
 }
 
-# NAVBAR
+// Formulario HTML para buscar clientes
 echo "<!DOCTYPE html>";
 echo "<html lang='es'>";
 echo "<head>";
@@ -52,29 +44,72 @@ echo "</div>";
 echo "<div class='content'>";
 echo "<h1>Total de Pedidos</h1>";
 
-# Mostrar tabla total con precios calculados
-$sql_total = "SELECT t.idTotal, t.FechaPedido, c.Nombre AS Cliente, c.DNI AS DNICliente, 
-              prod.Nombre AS Producto, t.Cantidad, prod.Precio, (t.Cantidad * prod.Precio) AS PrecioTotal
+// Formulario de búsqueda de clientes
+echo "<form method='GET' action='total.php'>
+        <label for='cliente'>Buscar pedidos por cliente:</label>
+        <input type='text' name='cliente' id='cliente' placeholder='Nombre del Cliente'>
+        <button type='submit'>Buscar</button>
+      </form>";
+
+// Obtener el nombre del cliente desde la solicitud
+$nombre_cliente = isset($_GET['cliente']) ? $_GET['cliente'] : '';
+
+$sql_total = "SELECT DATE(t.FechaPedido) AS Fecha, MONTH(t.FechaPedido) AS Mes, YEAR(t.FechaPedido) AS Anio, 
+              t.idTotal, t.FechaPedido, c.Nombre AS Cliente, c.DNI AS DNICliente, prod.Nombre AS Producto, 
+              t.Cantidad, prod.Precio, (t.Cantidad * prod.Precio) AS PrecioTotal
               FROM Total t 
               INNER JOIN Clientes c ON t.idClientes = c.idClientes
-              INNER JOIN Productos prod ON t.idProductos = prod.idProductos
-              ORDER BY t.FechaPedido DESC";
-$result_total = $conn->query($sql_total);
+              INNER JOIN Productos prod ON t.idProductos = prod.idProductos";
+
+// Añadir filtro por nombre de cliente si se ingresó
+if ($nombre_cliente != '') {
+    $sql_total .= " WHERE c.Nombre LIKE ?";
+}
+
+// Ordenar por fecha de pedido
+$sql_total .= " ORDER BY t.FechaPedido DESC";
+
+// Preparar y ejecutar la consulta
+$stmt = $conn->prepare($sql_total);
+if ($nombre_cliente != '') {
+    $search_param = "%" . $nombre_cliente . "%";
+    $stmt->bind_param("s", $search_param);
+}
+$stmt->execute();
+$result_total = $stmt->get_result();
 
 if ($result_total) {
     if ($result_total->num_rows > 0) {
-        echo "<table>
-            <tr>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>DNI del Cliente</th>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Precio Total</th>
-                <th>Acciones</th> <!-- Nueva columna para el botón de eliminar -->
-            </tr>";
+        $current_date = null;
+        $daily_total = 0;
+        
         while ($row = $result_total->fetch_assoc()) {
+            $row_date = $row["Fecha"];
+            $row_month = $row["Mes"] . "-" . $row["Anio"];
+
+            if ($current_date !== $row_date) {
+                if ($current_date !== null) {
+                    echo "<tr><td colspan='7' style='text-align:right; font-weight:bold;'>Total del Día:</td><td>$" . number_format($daily_total, 2) . "</td></tr>";
+                    echo "</table><br>";
+                }
+                $current_date = $row_date;
+                $daily_total = 0;
+
+                echo "<h3>Pedidos del " . $current_date . "</h3>";
+                echo "<table>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>DNI del Cliente</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Precio Total</th>
+                            <th>Acciones</th>
+                        </tr>";
+            }
+
+            $daily_total += $row["PrecioTotal"];
             echo "<tr>
                     <td>" . $row["FechaPedido"] . "</td>
                     <td>" . $row["Cliente"] . "</td>
@@ -86,36 +121,23 @@ if ($result_total) {
                     <td>
                         <form method='POST' action='total.php' style='display:inline-block;'>
                             <input type='hidden' name='idTotal' value='" . $row["idTotal"] . "'>
-                            <button type='submit' name='eliminar_total'>Eliminar</button>
+                            <button type='submit' name='eliminar_total' onclick=\"return confirm('¿Estás seguro de que deseas eliminar este pedido?')\">Eliminar</button>
                         </form>
                     </td>
                 </tr>";
         }
+
+        echo "<tr><td colspan='7' style='text-align:right; font-weight:bold;'>Total del Día:</td><td>$" . number_format($daily_total, 2) . "</td></tr>";
         echo "</table><br>";
     } else {
-        echo "No hay pedidos completados.<br>";
+        echo "No se encontraron pedidos para el cliente especificado.<br>";
     }
     $result_total->free();
 } else {
     echo "Error en la consulta de total de pedidos: " . $conn->error . "<br>";
 }
 
-# Calcular y mostrar el total general de todos los pedidos
-$sql_suma_total = "SELECT SUM(t.Cantidad * prod.Precio) AS SumaTotal
-                    FROM Total t
-                    INNER JOIN Productos prod ON t.idProductos = prod.idProductos";
-$result_suma_total = $conn->query($sql_suma_total);
-
-if ($result_suma_total) {
-    $row_suma_total = $result_suma_total->fetch_assoc();
-    $total_general = $row_suma_total['SumaTotal'];
-    echo "<h2>Total de Todos los Pedidos: $" . number_format($total_general, 2) . "</h2>";
-    $result_suma_total->free();
-} else {
-    echo "Error al calcular el total general: " . $conn->error . "<br>";
-}
-
-echo "</div>"; 
+echo "</div>";
 echo "</body>";
 echo "</html>";
 ?>
