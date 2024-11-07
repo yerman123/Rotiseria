@@ -7,7 +7,7 @@ html, body {
 }
 
 body {
-    background-image: url('https://i.imgur.com/IAhbM3F.png');
+    background-image: url('..\\images\\fondo.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
