@@ -17,11 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
     $fechaEntrega = null;
 
     if ($esReserva && !empty($_POST['fecha_entrega']) && !empty($_POST['hora_entrega'])) {
-        $fechaEntrega = $_POST['fecha_entrega'] . ' ' . $_POST['hora_entrega'];
+        $fechaEntrega = $_POST['fecha_entrega'] . ' ' . $_POST['hora_entrega'] . ':00';
     }
-
-    // Verificar si `$esReserva` llega correctamente
-    var_dump($esReserva); // Esto mostrará si `$esReserva` es 1 o 0. Eliminar después de la prueba.
 
     # Colocar cliente
     $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ?";
@@ -52,8 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
             $cantidad = 1;  # Asegurar que la cantidad mínima es 1
         }
         
-        // Cambiar "Reserva" a "reservado" en la consulta
-        $sql_insert_pedido = "INSERT INTO Pedidos (idProductos, idClientes, Cantidad, reservado, Fecha_Entrega) VALUES (?, ?, ?, ?, ?)";
+        $sql_insert_pedido = "INSERT INTO Pedidos (idProductos, idClientes, Cantidad, Reservado, Fecha_Entrega) VALUES (?, ?, ?, ?, ?)";
         $stmt_insert_pedido = $conn->prepare($sql_insert_pedido);
         $stmt_insert_pedido->bind_param("iiiss", $idProducto, $idCliente, $cantidad, $esReserva, $fechaEntrega);
 
@@ -61,7 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
             die("Error al agregar el pedido: " . $conn->error);
         }
     }
-
 
     # Redirigir al inicio después de completar los pedidos
     header("Location: inicio.php");
@@ -96,6 +91,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realizar Pedido</title>
     <link rel="stylesheet" href="style/pedidos.css">
+    <link rel="icon" href="images/icon.png">
     <link rel='stylesheet' href='style/navbar.css'>
     <style>
     #fecha-entrega-group {
@@ -233,7 +229,7 @@ $conn->close();
         <input type="date" id="fecha_entrega" name="fecha_entrega">
         <br>
         <label for="hora_entrega">Hora de Entrega:</label>
-        <input type="time" id="hora_entrega" name="hora_entrega" min="18:00" max="01:00" required>
+        <input type="time" id="hora_entrega" name="hora_entrega" min="18:00" max="01:00">
         <small>(Horario disponible: 18:00 a 01:00 Horas)</small>
     </div>
 </div>
