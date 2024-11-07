@@ -43,6 +43,7 @@ echo "<link href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&d
 echo "<meta charset='UTF-8'>";
 echo "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
 echo "<title>Bienvenido</title>";
+echo "<link rel='icon' href='images/icon.png'>";
 echo "<link rel='stylesheet' href='style/inicio.css'>";
 echo "<link rel='stylesheet' href='style/navbar.css'>"; 
 echo "<link rel='stylesheet' href='style/ayuda.css'>";
@@ -126,7 +127,7 @@ if (count($pedidosNormales) > 0) {
     }
     echo "</table>";
 } else {
-    echo "<h4>No hay pedidos normales disponibles.</h4> style='font-size:20px'";
+    echo "<h4>No hay pedidos disponibles. Agregue un pedido desde la página <a href='pedidos.php' style='color: #e4491a; font-weight: bold;'>agregar pedidos</a></h4>";
 }
 
 // Mostrar tabla de pedidos reservados
@@ -166,8 +167,15 @@ if (count($pedidosReservados) > 0) {
     }
     echo "</table>";
 } else {
-    echo "<h4>No hay pedidos reservados.</h4>";
+    echo "<h4>No hay pedidos reservados. Agregue un pedido desde la página <a href='pedidos.php' style='color: #e4491a; font-weight: bold;'>agregar pedidos</a></h4>";
 }
+
+echo "<button class='faq-button'>
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'>
+        <path d='M80 160c0-35.3 28.7-64 64-64h32c35.3 0 64 28.7 64 64v3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74V320c0 17.7 14.3 32 32 32s32-14.3 32-32v-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7V160c0-70.7-57.3-128-128-128H144C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z'></path>
+    </svg>
+    <span class='tooltip'>Contactanos por ayuda al: (número)</span>
+</button>";
 
 $conn->close();
 ?>
