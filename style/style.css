@@ -85,19 +85,7 @@ body {
     overflow: hidden;
 }
 
-#button::after {
-    content: "";
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.253);
-    height: 100%;
-    width: 150px;
-    top: 0;
-    left: -200px;
-    border-bottom-right-radius: 100px;
-    border-top-left-radius: 100px;
-    filter: blur(10px);
-    transition-duration: .5s;
-}
+
 
 #button:hover::after {
     transform: translateX(600px);
