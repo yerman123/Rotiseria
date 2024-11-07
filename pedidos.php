@@ -14,7 +14,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
 
     # Establecer si el pedido es una reserva
     $esReserva = isset($_POST['reserva']) && $_POST['reserva'] == '1' ? 1 : 0;
-    $fechaEntrega = $esReserva && !empty($_POST['fecha_entrega']) ? $_POST['fecha_entrega'] : null;
+    $fechaEntrega = null;
+
+    if ($esReserva && !empty($_POST['fecha_entrega']) && !empty($_POST['hora_entrega'])) {
+        $fechaEntrega = $_POST['fecha_entrega'] . ' ' . $_POST['hora_entrega'];
+    }
 
     // Verificar si `$esReserva` llega correctamente
     var_dump($esReserva); // Esto mostrará si `$esReserva` es 1 o 0. Eliminar después de la prueba.
@@ -91,7 +95,95 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realizar Pedido</title>
     <link rel="stylesheet" href="style/pedidos.css">
-    <link rel='stylesheet' href='style/navbar.css'> 
+    <link rel='stylesheet' href='style/navbar.css'>
+    <style>
+    #fecha-entrega-group {
+        display: none;
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 15px;
+        border: 2px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    #reserva:checked ~ #fecha-entrega-group {
+        display: block;
+    }
+
+    /* Estilos para los campos de fecha y hora */
+    #fecha-entrega-group input[type="date"],
+    #fecha-entrega-group input[type="time"] {
+        width: 200px;
+        padding: 10px;
+        margin: 8px 0 15px 0;
+        border: 2px solid #ced4da;
+        border-radius: 6px;
+        font-size: 15px;
+        background-color: white;
+    }
+
+    #fecha-entrega-group label {
+        display: block;
+        margin-top: 12px;
+        color: #2c3e50;
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+    #fecha-entrega-group small {
+        display: block;
+        color: #6c757d;
+        font-size: 13px;
+        margin-top: -10px;
+        margin-bottom: 12px;
+    }
+
+    /* Estilo mejorado para el checkbox y su label */
+    .form-group label[for="reserva"] {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 12px;
+        font-size: 20px;
+    }
+
+    /* Checkbox más grande y personalizado */
+    #reserva {
+        transform: scale(1.8);
+        margin-right: 8px;
+        vertical-align: middle;
+        cursor: pointer;
+        accent-color: #0056b3;
+    }
+
+    /* Efectos hover mejorados */
+    #fecha-entrega-group input:hover {
+        border-color: #90a4ae;
+        transition: all 0.3s ease;
+    }
+
+    #fecha-entrega-group input:focus {
+        outline: none;
+        border-color: #0056b3;
+        box-shadow: 0 0 0 3px rgba(0,86,179,0.25);
+    }
+
+    /* Estilo para el contenedor del checkbox */
+    .form-group {
+        margin: 20px 0;
+    }
+
+    /* Estilo para cuando el checkbox está marcado */
+    #reserva:checked {
+        background-color: #0056b3;
+    }
+
+    /* Mejora de la legibilidad en el hover del checkbox */
+    label[for="reserva"]:hover {
+        cursor: pointer;
+        color: #0056b3;
+    }
+</style>
 </head>
 <body>
 
@@ -133,25 +225,22 @@ $conn->close();
     </div>
 
     <div class="form-group">
-        <label for="reserva">¿Es una reserva?</label>
-        <input type="checkbox" id="reserva" name="reserva" value="1">
-    </div>
-
-    <!-- Campo de Fecha de Entrega (solo se muestra si es una reserva) -->
-    <div class="form-group" id="fecha-entrega-group" style="display: none;">
+    <label for="reserva">¿Es una reserva?</label>
+    <input type="checkbox" id="reserva" name="reserva" value="1">
+    <div id="fecha-entrega-group">
         <label for="fecha_entrega">Fecha de Entrega:</label>
         <input type="date" id="fecha_entrega" name="fecha_entrega">
+        <br>
+        <label for="hora_entrega">Hora de Entrega:</label>
+        <input type="time" id="hora_entrega" name="hora_entrega" min="20:00" max="00:00" required>
+        <small>(Horario disponible: 20:00 a 00:00 Horas)</small>
     </div>
+</div>
 
     <input type="submit" value="Completar Pedido">
 </form>
 
-<script>
-    // Mostrar/Ocultar el campo de fecha según el estado de reserva
-    document.getElementById('reserva').addEventListener('change', function() {
-        document.getElementById('fecha-entrega-group').style.display = this.checked ? 'block' : 'none';
-    });
-</script>
+
 
 <div class='navbar'>
     <a href='inicio.php'>Inicio</a>
