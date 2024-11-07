@@ -75,6 +75,7 @@ $result_productos = $conn->query($sql_productos);
 $sql_clientes = "SELECT Nombre, Apellido, Telefono FROM Clientes";
 $result_clientes = $conn->query($sql_clientes);
 
+
 $productos = [];
 if ($result_productos->num_rows > 0) {
     while ($row = $result_productos->fetch_assoc()) {
@@ -232,8 +233,8 @@ $conn->close();
         <input type="date" id="fecha_entrega" name="fecha_entrega">
         <br>
         <label for="hora_entrega">Hora de Entrega:</label>
-        <input type="time" id="hora_entrega" name="hora_entrega" min="20:00" max="00:00" required>
-        <small>(Horario disponible: 20:00 a 00:00 Horas)</small>
+        <input type="time" id="hora_entrega" name="hora_entrega" min="18:00" max="01:00" required>
+        <small>(Horario disponible: 18:00 a 01:00 Horas)</small>
     </div>
 </div>
 
