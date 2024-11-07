@@ -67,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="style/style.css">
-    <link rel="icon" href="https://i.imgur.com/sMYm4bC.png">
+    <link rel="icon" href="images/icon.png">
     <title>Buitre Delivery</title>
     <style>
         body {
@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
 </head>
 <body>
     <form class="form_main" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-        <img src="https://i.imgur.com/u4NxpF4.png" alt="El Buitre" class="form_image">
+        <img src="images/logo.png" alt="El Buitre" class="form_image">
         <p class="heading">Iniciar sesión</p>
         <div class="inputContainer">
             <input placeholder="Usuario" id="username" name="username" class="inputField" type="text" required>
