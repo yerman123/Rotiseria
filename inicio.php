@@ -63,7 +63,8 @@ echo "<div class='content'>";
 echo "<h1>¡Bienvenido, " . htmlspecialchars($_SESSION['username']) . "! 🍕</h1>";
 
 // Consultar pedidos y sumar precios por cliente
-$sql_pedidos = "SELECT c.Nombre AS Cliente, c.Apellido, pr.Nombre AS Producto, p.Cantidad, pr.Precio, p.FechaPedido, p.idPedidos, 
+$sql_pedidos = "SELECT c.Nombre AS Cliente, c.Apellido, pr.Nombre AS Producto, 
+                        p.Cantidad, pr.Precio, p.FechaPedido, p.Fecha_Entrega, p.idPedidos, 
                        (p.Cantidad * pr.Precio) AS PrecioTotalProducto, p.Reservado
                 FROM Pedidos p
                 JOIN Clientes c ON p.idClientes = c.idClientes
@@ -125,22 +126,27 @@ if (count($pedidosNormales) > 0) {
     }
     echo "</table>";
 } else {
-    echo "<h4>No hay pedidos normales disponibles.</h4>";
+    echo "<h4>No hay pedidos normales disponibles.</h4> style='font-size:20px'";
 }
 
+// Mostrar tabla de pedidos reservados
 // Mostrar tabla de pedidos reservados
 echo "<h2>Pedidos Reservados</h2>";
 if (count($pedidosReservados) > 0) {
     echo "<table class='tabla-pedidos' border='0'>";
     foreach ($pedidosReservados as $cliente => $reservados) {
         echo "<tr><th colspan='5' style='background-color:#8b4513'>Cliente: $cliente | Total Acumulado: $" . number_format($totalPorCliente[$cliente], 2) . "</th></tr>";
-        echo "<tr><th>Producto</th><th>Cantidad</th><th>Precio Total</th><th>Fecha de Pedido</th><th>Acciones</th></tr>";
+        echo "<tr><th>Producto</th><th>Cantidad</th><th>Precio Total</th><th>Fecha y Hora de Entrega</th><th>Acciones</th></tr>";
         foreach ($reservados as $pedido) {
             echo "<tr>";
             echo "<td>" . htmlspecialchars($pedido['Producto']) . "</td>";
             echo "<td>" . htmlspecialchars($pedido['Cantidad']) . "</td>";
             echo "<td>" . number_format($pedido['PrecioTotalProducto'], 2) . "</td>";
-            echo "<td>" . htmlspecialchars($pedido['FechaPedido']) . "</td>";
+            // Formatear la fecha y hora de entrega
+            $fechaEntrega = !empty($pedido['Fecha_Entrega']) ? 
+                           date('d/m/Y H:i', strtotime($pedido['Fecha_Entrega'])) : 
+                           'No especificada';
+            echo "<td>" . htmlspecialchars($fechaEntrega) . "</td>";
             echo "<td>";
             echo "<form method='POST' action='completar.php' style='display:inline-block;'>";
             echo "<input type='hidden' name='pedido_id' value='" . htmlspecialchars($pedido["idPedidos"]) . "'>";
