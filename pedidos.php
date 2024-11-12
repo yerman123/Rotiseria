@@ -1,18 +1,18 @@
 <?php
 include("conexion.php");
 
-# Verificar la conexión
+#verificar la conexión
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
 }
 
-# Verificar si se envió un pedido
+#verificar si se envió un pedido
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset($_POST['nombreCliente'])) {
     $productos = $_POST['productos'];
     $cantidades = $_POST['cantidades'];
     $nombreCliente = $_POST['nombreCliente'];
 
-    # Establecer si el pedido es una reserva
+    #establecer si el pedido es una reserva
     $esReserva = isset($_POST['reserva']) && $_POST['reserva'] == '1' ? 1 : 0;
     $fechaEntrega = null;
 
@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         $fechaEntrega = $_POST['fecha_entrega'] . ' ' . $_POST['hora_entrega'] . ':00';
     }
 
-    # Colocar cliente
+    #colocar cliente
     $sql_cliente = "SELECT idClientes FROM Clientes WHERE Nombre = ?";
     $stmt_cliente = $conn->prepare($sql_cliente);
     $stmt_cliente->bind_param("s", $nombreCliente);
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         $row_cliente = $result_cliente->fetch_assoc();
         $idCliente = $row_cliente['idClientes'];
     } else {
-        # Colocar nuevo cliente si no existe
+        #colocar nuevo cliente si no existe
         $sql_insert_cliente = "INSERT INTO Clientes (Nombre) VALUES (?)";
         $stmt_insert_cliente = $conn->prepare($sql_insert_cliente);
         $stmt_insert_cliente->bind_param("s", $nombreCliente);
@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
     foreach ($productos as $idProducto) {
         $cantidad = intval($cantidades[$idProducto]);
         if ($cantidad < 1) {
-            $cantidad = 1;  # Asegurar que la cantidad mínima es 1
+            $cantidad = 1;  #Asegurar que la cantidad mínima es 1
         }
         
         $sql_insert_pedido = "INSERT INTO Pedidos (idProductos, idClientes, Cantidad, Reservado, Fecha_Entrega) VALUES (?, ?, ?, ?, ?)";
@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['productos']) && isset(
         }
     }
 
-    # Redirigir al inicio después de completar los pedidos
+    # rdirigir al inicio después de completar los pedidos
     header("Location: inicio.php");
     exit();
 }
@@ -108,7 +108,6 @@ $conn->close();
         display: block;
     }
 
-    /* Estilos para los campos de fecha y hora */
     #fecha-entrega-group input[type="date"],
     #fecha-entrega-group input[type="time"] {
         width: 200px;
@@ -136,7 +135,6 @@ $conn->close();
         margin-bottom: 12px;
     }
 
-    /* Estilo mejorado para el checkbox y su label */
     .form-group label[for="reserva"] {
         font-weight: bold;
         color: #2c3e50;
@@ -165,17 +163,16 @@ $conn->close();
         box-shadow: 0 0 0 3px rgba(0,86,179,0.25);
     }
 
-    /* Estilo para el contenedor del checkbox */
+    /*Estilo para el contenedor del checkbox */
     .form-group {
         margin: 20px 0;
     }
 
-    /* Estilo para cuando el checkbox está marcado */
+    /*Estilo para cuando el checkbox está marcado */
     #reserva:checked {
         background-color: #0056b3;
     }
-
-    /* Mejora de la legibilidad en el hover del checkbox */
+    
     label[for="reserva"]:hover {
         cursor: pointer;
         color: #0056b3;
